@@ -9,11 +9,11 @@ run.mcmc <- function(width,height,fixed_g=FALSE,g=1,coal_type=3,gam=1,const_coal
   require(Matrix)
   require(igraph)
   
-  source(paste0(path,'mcmc.fns.R'))
-  source(paste0(path,'findG.HMC.R'))
-  source(paste0(path,'findG.MH.R'))
-  source(paste0(path,'findG.MH.com.R'))
-  source(paste0(path,'findG.nnls.R'))
+  source(file.path(path,'mcmc.fns.R'))
+  source(file.path(path,'findG.HMC.R'))
+  source(file.path(path,'findG.MH.R'))
+  source(file.path(path,'findG.MH.com.R'))
+  source(file.path(path,'findG.nnls.R'))
   
   #save RNG state
   set.seed(seed)

@@ -1,7 +1,7 @@
 #testing
 #enter file path (put / at end)
-path <- '~/Documents/gene-flow-inference/'
-source(paste0(path,'run.mcmc.R'))
+path <- getwd()
+source(file.path(path,'run.mcmc.R'))
 
 require(Matrix)
 require(igraph)
