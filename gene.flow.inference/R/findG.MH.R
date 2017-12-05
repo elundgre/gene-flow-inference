@@ -183,7 +183,7 @@ findG.MH <- function(H,G_adj,const_coal=TRUE,iter=10000,fixed_start=FALSE,g_init
     
   }
   
-  #marginal ditributions based on the last half of iterations
+  #marginal means based on the last half of iterations
   g_marg <- colMeans(g[round(iter/2):iter,])
   if(const_coal == TRUE) gam_marg <- mean(gam[round(iter/2):iter,])
   else gam_marg <- colMeans(gam[round(iter/2):iter,])
@@ -199,7 +199,11 @@ findG.MH <- function(H,G_adj,const_coal=TRUE,iter=10000,fixed_start=FALSE,g_init
     sdgam <- sdgam[1]
   }
   
-  return(list(G=G,g_marg=g_marg,gam_marg=gam_marg,g=g,gam=gam,lllh=lllh,lllhprimeg=lllhprimeg,lllhprimegam=lllhprimegam,
-              reject_g=reject_g,reject_gam=reject_gam,sdG=sdG,sdgam=sdgam,H=H,h=h))
+  #find medians
+  g_med <- matrixStats::colMedians(g)
+  gam_med <- matrixStats::colMedians(gam)
+  
+  return(list(G=G,g_marg=g_marg,gam_marg=gam_marg,g=g,gam=gam,g_med=g_med,gam_med=gam_med,lllh=lllh,lllhprimeg=lllhprimeg,
+              lllhprimegam=lllhprimegam,reject_g=reject_g,reject_gam=reject_gam,sdG=sdG,sdgam=sdgam,H=H,h=h))
   
 }

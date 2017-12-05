@@ -185,7 +185,7 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
     
   }
   
-  #marginal ditributions based on the last half of iterations
+  #marginal means based on the last half of iterations
   g_marg <- colMeans(g[round(iter/2):iter,])
   q_marg <- colMeans(q[round(iter/2):iter,])
   
@@ -194,7 +194,17 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
   G@x <- g_marg
   Matrix::diag(G) <- -Matrix::rowSums(G)
   
-  return(list(G=G,g_marg=g_marg,q_marg=q_marg,g=g,q=q,lllh=lllh,lllhprimeg=lllhprimeg,lllhprimeq=lllhprimeq,
+  #get rid of standard deviation vectors if they are constant
+  if(fixed_sd == TRUE){
+    sdG <- sdG[1]
+    sdq <- sdq[1]
+  }
+  
+  #find medians
+  g_med <- matrixStats::colMedians(g)
+  q_med <- matrixStats::colMedians(q)
+  
+  return(list(G=G,g_marg=g_marg,q_marg=q_marg,g=g,q=q,g_med=g_med,q_med=q_med,lllh=lllh,lllhprimeg=lllhprimeg,lllhprimeq=lllhprimeq,
               reject_g=reject_g,reject_q=reject_q,sdG=sdG,sdq=sdq))
   
 }
