@@ -1,34 +1,45 @@
 #many runs of small coal vs com
 
 require(parallel)
-in_path <- "~/Documents/gene-flow-inference/"
-out_path <- "~/Documents/gene-flow-inference/plots/"
+require(gene.flow.inference)
 
-values <- c(rep(1/1000,25),rep(1/200,25),rep(1/100,25),rep(1/50,25))
+#file path for output
+out_path <- "~/Dropbox/code/gene-flow-inference/plots/"
+#or use current path
+#outpath <- getwd()
 
-time_m <- system.time(mult <- mcmapply(mult_small,noise=values,const_coal=TRUE,seed=rep(seeds,4),mc.cores=6,SIMPLIFY=FALSE))
+#number of replicates
+reps <- 1
+
+values <- c(rep(1/1000,reps),rep(1/200,reps),rep(1/100,reps),rep(1/50,reps))
+seeds <- sample(1000000000,reps)
+
+time_m <- system.time(mult <- mcmapply(mult.small,noise=values,const_coal=TRUE,seed=rep(seeds,4),mc.cores=4,SIMPLIFY=FALSE))
 save.image(paste0(out_path,"3x2_mult6.RData"))
 
-png(file=paste0(out_path,"3x2_plots/mult6box%02d.png"),width=8*144, height=4*144, res=144, pointsize=10)
-for(i in 1:100){
-  boxplot(mult[[i]]$a3x2s_com$ans$g[10*(1:(iter/10)),order(mult[[i]]$g)],outline=FALSE,main=paste("3x2 Symmetric Graph (Commute Time Inference)",i),
+#png(file=paste0(out_path,"3x2_plots/mult6box%02d.png"),width=8*144, height=4*144, res=144, pointsize=10)
+for(i in 1:(4*reps)){
+  boxplot(mult[[i]]$a3x2s_com$ans$g[10*(1:(mult[[i]]$a3x2s_com$iter/10)),order(mult[[i]]$g)],outline=FALSE,
+          main=paste("3x2 Symmetric Graph (Commute Time Inference)",i),
           names=paste0("g",order(mult[[i]]$g)),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
   points(mult[[i]]$g[order(mult[[i]]$g)],pch=19,col=3)
 
-  boxplot(mult[[i]]$a3x2s_coal$ans$g[10*(1:(iter_coal/10)),order(mult[[i]]$g)],outline=FALSE,
+  boxplot(mult[[i]]$a3x2s_coal$ans$g[10*(1:(mult[[i]]$a3x2s_coal$iter/10)),order(mult[[i]]$g)],outline=FALSE,
           main=paste("3x2 Symmetric Graph (Coalescence Time Inference)",i),
           names=paste0("g",order(mult[[i]]$g)),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
   points(mult[[i]]$g[order(mult[[i]]$g)],pch=19,col=3)
   
-  boxplot(mult[[i]]$a3x2s_coal$ans$gam[10*(1:(iter/10)),1],outline=FALSE,main=paste("3x2 Symmetric Graph (Commute Time Inference) gamma",i),
+  boxplot(mult[[i]]$a3x2s_coal$ans$gam[10*(1:(mult[[i]]$a3x2s_coal$iter/10)),1],outline=FALSE,
+          main=paste("3x2 Symmetric Graph (Coalescencec Time Inference) gamma",i),
           names=paste0("gam",1),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
   points(rep(1,n),pch=19,col=3)
   
-  boxplot(mult[[i]]$a3x2s_com$ans$q[10*(1:(iter/10)),order(diag(mult[[i]]$a3x2s_com$H))],outline=FALSE,main=paste("3x2 Symmetric Graph (Commute Time Inference) q",i),
+  boxplot(mult[[i]]$a3x2s_com$ans$q[10*(1:(mult[[i]]$a3x2s_com$iter/10)),order(diag(mult[[i]]$a3x2s_com$H))],outline=FALSE,
+          main=paste("3x2 Symmetric Graph (Commute Time Inference) q",i),
           names=paste0("q",order(diag(mult[[i]]$a3x2s_com$H))),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
   points(diag(mult[[i]]$a3x2s_com$H)[order(diag(mult[[i]]$a3x2s_com$H))],pch=19,col=3)
 }
-dev.off()
+#dev.off()
 
 #plot log likelihoods
 png(file=paste0(out_path,"3x2_plots/mult5lllh%02d.png"),width=8*144, height=4*144, res=144, pointsize=10)

@@ -203,6 +203,10 @@ findG.MH <- function(H,G_adj,const_coal=TRUE,iter=10000,fixed_start=FALSE,g_init
   g_med <- matrixStats::colMedians(g)
   gam_med <- matrixStats::colMedians(gam)
   
+  #find inter-quartile ranges
+  g_iqr <- matrixStats::colIQRs(g)
+  gam_iqr <- matrixStats::colIQRs(gam)
+  
   return(list(G=G,g_marg=g_marg,gam_marg=gam_marg,g=g,gam=gam,g_med=g_med,gam_med=gam_med,lllh=lllh,lllhprimeg=lllhprimeg,
               lllhprimegam=lllhprimegam,reject_g=reject_g,reject_gam=reject_gam,sdG=sdG,sdgam=sdgam,H=H,h=h))
   

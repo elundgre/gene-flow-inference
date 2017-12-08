@@ -204,6 +204,10 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
   g_med <- matrixStats::colMedians(g)
   q_med <- matrixStats::colMedians(q)
   
+  #find inter-quartile ranges
+  g_iqr <- matrixStats::colIQRs(g)
+  q_iqr <- matrixStats::colIQRs(q)
+  
   return(list(G=G,g_marg=g_marg,q_marg=q_marg,g=g,q=q,g_med=g_med,q_med=q_med,lllh=lllh,lllhprimeg=lllhprimeg,lllhprimeq=lllhprimeq,
               reject_g=reject_g,reject_q=reject_q,sdG=sdG,sdq=sdq))
   
