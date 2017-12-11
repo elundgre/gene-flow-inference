@@ -1,5 +1,4 @@
-#different noise levels, asymmetric, unknown if coalescence rates are same everywhere
-
+#different coalescence rates, symmetric, unknown if coalescence rates are same everywhere
 require(parallel)
 require(gene.flow.inference)
 
@@ -11,9 +10,9 @@ out_path <- getwd()
 #number of replicates
 reps <- 25
 
-noise_values <- c(rep(1/1000,reps),rep(1/200,reps),rep(1/100,reps),rep(1/50,reps))
+gam_values <- c(rep(10,reps),rep(1,reps),rep(0.1,reps))
 seeds <- sample(1000000000,reps)
 
-time_m <- system.time(mult <- mcmapply(mult.small,noise=noise_values,gam=1,const_coal=FALSE,symmetric=FALSE,
+time_m <- system.time(mult <- mcmapply(mult.small,noise=1/200,gam=gam_values,const_coal=FALSE,symmetric=TRUE,
                                        seed=rep(seeds,4),mc.cores=6,SIMPLIFY=FALSE))
-save.image("mult_noise_asym_vc.RData")
+save.image("mult_gam_sym_vc.RData")
