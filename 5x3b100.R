@@ -57,14 +57,14 @@ b_iter_coal <- 4e6
 iter_coal <- 5e6
 
 #specify amount of noise
-noise <- 1/1000
+noise <- 1/100
 
 a_coal <- run.mcmc(width,height,fixed_g=TRUE,g=g,coal_type=4,gam=gam,const_coal=const_coal,noise=noise,seed=seed,
-                      preburn_iter=pb_iter_coal,burn_iter=b_iter_coal,iter=iter_coal,noisy_H=TRUE,type="coal")
+                   preburn_iter=pb_iter_coal,burn_iter=b_iter_coal,iter=iter_coal,noisy_H=TRUE,type="coal")
 
-save.image("5x3b.Rdata")
+save.image("5x3b100.Rdata")
 
 boxplot(a_coal$ans$g[1000*(1:iter_coal/1000),order(g)],outline=FALSE,
-        main="5x3 Graph with Barriers, Noise 1/1000",
+        main="5x3 Graph with Barriers, Noise 1/100",
         names=paste0("g",order(g)),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
 points(g[order(g)],pch=19,col=3)
