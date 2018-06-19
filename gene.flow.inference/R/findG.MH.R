@@ -19,6 +19,12 @@ findG.MH <- function(H,G_adj,const_coal=TRUE,iter=10000,fixed_start=FALSE,g_init
   h <- as.vector(H[upper.tri(H,diag=TRUE)])
   
   #return(h)
+  #make sure sig2ep is the right length (either a scalar or same length as h)
+  if((length(sig2ep) != 1) && (length(sig2ep) != length(h))){
+    print(length(sig2ep))
+    print(length(h))
+    stop("sig2ep must be either a scalar or the same length as h")
+  }
   
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
   G_adj <- as(G_adj,"dgCMatrix")

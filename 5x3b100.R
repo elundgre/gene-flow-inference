@@ -64,6 +64,8 @@ a_coal <- run.mcmc(width,height,fixed_g=TRUE,g=g,coal_type=4,gam=gam,const_coal=
 
 save.image("5x3b100.Rdata")
 
+load("5x3b100.Rdata")
+
 boxplot(a_coal$ans$g[1000*(1:iter_coal/1000),order(g)],outline=FALSE,
         main="5x3 Graph with Barriers, Noise 1/100",
         names=paste0("g",order(g)),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)

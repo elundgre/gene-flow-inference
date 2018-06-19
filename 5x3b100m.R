@@ -48,7 +48,7 @@ plot(gr,layout=as.matrix(expand.grid(1:width,1:height)),edge.width=g,edge.label=
      main="5x3 Graph with Barriers")
 
 #specify coalescence type
-const_coal <- FALSE
+const_coal <- TRUE
 #specify coalescence rates
 gam <- rep(1,n)
 
@@ -68,7 +68,7 @@ a_coal <- run.mcmc(width,height,fixed_g=TRUE,g=g,coal_type=4,gam=gam,const_coal=
                    preburn_iter=pb_iter_coal,burn_iter=b_iter_coal,iter=iter_coal,noisy_H=TRUE,type="coal",
                    missing_H = missing_H,missing_loc=missing_loc)
 
-save.image("5x3bm.Rdata")
+save.image("5x3b100m.Rdata")
 
 boxplot(a_coal$ans$g[1000*(1:iter_coal/1000),order(g)],outline=FALSE,
         main="5x3 Graph with Barriers, Noise 1/100, 4 Missing Values",

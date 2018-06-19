@@ -280,7 +280,8 @@ loglikelihood <- function(h,hcalc,sig2ep,g,gam,lamG,lamgam){
   if(!all(g>0,gam>0)) return(-Inf)
   
   #choose whether it bayesian or not (also change dU_an accordingly)
-  lllh <- -sum(lamG*g)-sum(lamgam*gam)-(1/(2*sig2ep))*sum((hcalc-h)^2,na.rm=TRUE) #bayesian
+  #lllh <- -sum(lamG*g)-sum(lamgam*gam)-(1/(2*sig2ep))*sum((hcalc-h)^2,na.rm=TRUE) #bayesian
+  lllh <- -sum(lamG*g)-sum(lamgam*gam)-sum(((hcalc-h)^2)/(2*sig2ep),na.rm=TRUE) #bayesian
   #lllh <- -(1/(2*sig2ep))*sum((hcalc-h)^2,na.rm=TRUE) #non-bayesian
   
   return(lllh)
