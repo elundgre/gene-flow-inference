@@ -1,6 +1,6 @@
 #function for running mcmc stuff when you don't know the actual answer
 
-run.mcmc.h <- function(width,height,g_known=TRUE,fixed_g=FALSE,g=1,coal_type=3,gam=1,const_coal=TRUE,noise=1/500,seed=sample(1000000000,1),
+run.mcmc <- function(width,height,g_known=TRUE,fixed_g=FALSE,g=1,coal_type=3,gam=1,const_coal=TRUE,noise=1/500,seed=sample(1000000000,1),
                      H=NA,h_se=NA,preburn_iter=1e5,burn_iter=1e5,iter=1e5,continue=FALSE,g_init,gam_init,sdG_init,sdgam_init,
                      noisy_H=FALSE,missing_H=FALSE,missing_loc,type="coal"){
   #coal_type: 1 is constant everywhere, 2 is iid, 3 is 1 everywhere, 4 is user specified
