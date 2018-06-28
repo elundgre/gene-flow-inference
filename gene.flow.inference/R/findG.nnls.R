@@ -19,7 +19,7 @@ findG.nnls <- function(H,G_adj,const_coal=TRUE){
   if(max(H-t(H))/max(H) > 1e-10) stop("Matrix is not symmetric. Please enter a symmetric matrix")
   
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
-  G_adj <- as(G_adj,"dgCMatrix")
+  #G_adj <- as(G_adj,"dgCMatrix")
   G_struct <- G_adj
   Matrix::diag(G_struct) <- 1
   #future: add check to make sure all non-zero entries are 1

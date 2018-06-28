@@ -26,7 +26,7 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
     stop("sig2ep must be either a scalar or the same length as h")
   
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
-  G_adj <- as(G_adj,"dgCMatrix")
+  #G_adj <- as(G_adj,"dgCMatrix")
   #G_struct <- G_adj
   #diag(G_struct) <- 1
   #future: add check to make sure all non-zero entries are 1

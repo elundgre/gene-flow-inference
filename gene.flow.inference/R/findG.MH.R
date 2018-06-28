@@ -27,7 +27,7 @@ findG.MH <- function(H,G_adj,const_coal=TRUE,iter=10000,fixed_start=FALSE,g_init
   }
   
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
-  G_adj <- as(G_adj,"dgCMatrix")
+  #G_adj <- as(G_adj,"dgCMatrix")
   #G_struct <- G_adj
   #diag(G_struct) <- 1
   #future: add check to make sure all non-zero entries are 1
