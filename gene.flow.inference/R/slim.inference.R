@@ -67,8 +67,8 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
   
   #initialize list for indices of individuals near center of each location
   indiv <- list()
-  #initialize vector for indices of sampled individuals (from all locations)
-  indiv_s <- rep(NA,ni*n)
+  #initialize list for indices of sampled individuals (from all locations)
+  indiv_s_l <- list()
   
   #loop through each location left to right, bottom to top
   #sample ni individuals near the center of each location
@@ -84,15 +84,25 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
                               intersect(which(positions$y<centers[k,2]+loc_h/(2/sample_area)),
                                         which(positions$y>centers[k,2]-loc_h/(2/sample_area))))
       if(length(indiv[[k]]) > ni){ #if there are at least as many individuals as we want from each location
-        indiv_s[((k-1)*ni+1):(k*ni)] <- indiv[[k]][1:ni] #same ni of the total individuals (order is already randomized)
+        #indiv_s[((k-1)*ni+1):(k*ni)] <- indiv[[k]][1:ni] #same ni of the total individuals (order is already randomized)
+        indiv_s_l[[k]] <- indiv[[k]][1:ni] #same ni of the total individuals (order is already randomized)
       }
       else{
-        if(length(indiv[[k]]) > 0){ #make sure there is at least one individual, otherwise leave it NA
-          indiv_s[((k-1)*ni+1):((k-1)*ni+1+length(indiv[[k]]))] <- indiv[[k]] #if there are fewer than ni, just take all of them
-        }
-        print(paste(c("Only",length(indiv[[k]]),"individuals in square",k)))
+        #indiv_s[((k-1)*ni+1):((k-1)*ni+1+length(indiv[[k]]))] <- indiv[[k]] #if there are fewer than ni, just take all of them
+        indiv_s_l[[k]] <- indiv[[k]]
+        print(paste(c(length(indiv[[k]]),"individuals in location",k)))
       }
     }
+  }
+  
+  #unlist indices of sampled individual
+  indiv_s <- unlist(indiv_s_l)
+  
+  #find starting indices for which genomes correspond to each location
+  start_ind <- rep(0,(n+1)) #declare vector
+  start_ind[1] <- 1 #first location starts at beginning
+  for(k in 2:(n+1)){ #also include "start" point for after the end of the last location for later convenience
+    start_ind[k] <- start_ind[k-1]+2*length(indiv_s_l[[k-1]]) #multiply by 2 since it is diploid
   }
   
   #find indices of genomes of sampled individuals (2 genomes per individuals since it is diploid)
@@ -122,13 +132,15 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
       k <- k+1
       #find indices (and distances) of both genomes of the individuals in the ith and jth locations
       #subset of matrix for each pair of locations
-      dist_ij[[k]] <- dist[((i-1)*2*ni+1):(i*2*ni),((j-1)*2*ni+1):(j*2*ni)] #ex: if ni=50,i=1,j=3, then subsets dist[[k]]=dist[1:100,201:300]
+      #dist_ij[[k]] <- dist[((i-1)*2*ni+1):(i*2*ni),((j-1)*2*ni+1):(j*2*ni)] #ex: if ni=50,i=1,j=3, then subsets dist[[k]]=dist[1:100,201:300]
+      dist_ij[[k]] <- dist[start_ind[i]:(start_ind[i+1]-1),start_ind[j]:(start_ind[j+1]-1)]
       #remove data on and above diag if this is a self comparison
       if(i==j) dist_ij[[k]][upper.tri(dist_ij[[k]],diag=TRUE)] <- NA
       #means for each pair
       Hs[i,j] <- mean(dist_ij[[k]],na.rm=TRUE)
       #standard error of the mean (#divide by sqrt of min # of ind in either location)
-      Hs_se[i,j] <- sd(dist_ij[[k]],na.rm=TRUE)/sqrt(min(length(indiv[[i]]),length(indiv[[j]]),ni))
+      #Hs_se[i,j] <- sd(dist_ij[[k]],na.rm=TRUE)/sqrt(min(length(indiv[[i]]),length(indiv[[j]]),ni))
+      Hs_se[i,j] <- sd(dist_ij[[k]],na.rm=TRUE)/sqrt(min(length(indiv_s_l[[i]]),length(indiv_s_l[[j]])))
       #print(length(dist_ij[[k]]))
       #print(length(locsi),locsj)
     }
