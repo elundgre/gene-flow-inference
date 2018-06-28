@@ -25,16 +25,15 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
   #declare list for different sections of the file
   genomes <- list()
   
-  #find cutoffs for dividing it into 5
-  if(t_ind%%5 != 0) stop("number of individuals should be divisible by 5")
-  cutoffs <- (0:5)*2*t_ind/5 #2 genomes per individual
+  #find cutoffs
+  cutoffs <- round((0:5)*2*t_ind/5) #2 genomes per individual
   
   #read in values
   for(i in 1:5){
     genomes[[i]] <- 
       Matrix::t(Matrix::Matrix(
         as.numeric(do.call(cbind,strsplit(
-          scan(paste(inpath,gen_name,sep="/"),skip=3+cutoffs[i],what='numeric',nlines=2*t_ind/5),""))),nrow=gen_length))
+          scan(paste(inpath,gen_name,sep="/"),skip=3+cutoffs[i],what='numeric',nlines=(cutoffs[i+1]-cutoffs[i])),""))),nrow=gen_length))
     gc() #clean up
   }
   #combine matrices
@@ -172,7 +171,7 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
             xlab="Position (x)",ylab="Position (y)",main=main) #plot landscape
       points(positions[,2:3],pch=46) #all individuals (small points)
     } else{
-      plot(positions[,2:3],pch=46,xlim=c(xmin,xmax),ylim=c(ymin,ymax),
+      plot(positions[,2:3],pch=46,xlim=c(xmin,xmax),ylim=c(ymin,ymax),xaxs='i',yaxs='i', #make plot end exactly at limits
            xlab="Position (x)",ylab="Position (y)",main=main) #all individuals (small points)
     }
     for(k in 1:n){
@@ -193,13 +192,14 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
   dev.off()
   
   #save workspace
-  save.image(paste0(outpath,"/",fname,".RData"))
+  #save(ls(),list=ls(),file=paste0(outpath,"/",fname,".RData"))
+  save(list=ls(),file=paste0(outpath,"/",fname,".RData"))
   
   #run mcmc
   system.time(a <- run.mcmc(width,height,g_known=FALSE,const_coal=TRUE,H=Hs,h_se=hs_se,seed=seed,
                                preburn_iter=preburn_iter,burn_iter=burn_iter,iter=iter,noisy_H=FALSE,type="coal"))
   
-  save.image(paste0(outpath,"/",fname,".RData"))
+  save(list=ls(),file=paste0(outpath,"/",fname,".RData"))
   
   cairo_pdf(filename=paste0(outpath,"/posterior_dists_",fname,".pdf"),width=8,height=7)
     boxplot(a$ans$g[10*(1:(iter/10)),order(a$ans$g_med)],outline=FALSE,main=paste0("Posterior Distributions: ",fname),
