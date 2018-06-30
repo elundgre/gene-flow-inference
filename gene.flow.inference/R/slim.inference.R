@@ -167,7 +167,7 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
   main <- paste0("Individual Locations: ",name)
     if(is.matrix(landscape_matrix) == TRUE){
       image(seq(xmin,xmax,length.out=nrow(landscape_matrix)),seq(ymin,ymax,length.out=ncol(landscape_matrix)),
-            mapValues,xlim=c(xmin,xmax),ylim=c(xmin,xmax),
+            mapValues,xlim=c(xmin,xmax),ylim=c(ymin,ymax),
             xlab="Position (x)",ylab="Position (y)",main=main) #plot landscape
       points(positions[,2:3],pch=46) #all individuals (small points)
     } else{
