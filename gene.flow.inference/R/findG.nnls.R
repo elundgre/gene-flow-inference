@@ -16,7 +16,9 @@ findG.nnls <- function(H,G_adj,const_coal=TRUE){
   if((NROW(H) != NROW(G_adj)) || (NCOL(H) != NCOL(G_adj))) stop("H and G_adj must have the same dimensions")
   
   #make sure matrix is symmetric up to computational error
-  if(max(H-t(H))/max(H) > 1e-10) stop("Matrix is not symmetric. Please enter a symmetric matrix")
+  if(max(H-Matrix::t(H),na.rm=TRUE)/max(H,na.rm=TRUE) > 1e-10) stop("Matrix is not symmetric. Please enter a symmetric matrix")
+  #make H exactly symmetric
+  H <- (H+Matrix::t(H))/2
   
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
   #G_adj <- as(G_adj,"dgCMatrix")

@@ -2,13 +2,15 @@
 
 slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,height=4,ni=50,sample_area=.5,
                            seed=sample(1000000000,1),preburn_iter=1e6,burn_iter=3e6,iter=4e6,inpath=getwd(),outpath=getwd(),
-                           pos_name="positions3.txt",gen_name="ms3.txt",landscape_matrix=NULL){
+                           pos_name="positions3.txt",gen_name="ms3.txt",landscape_matrix=NULL,ind_shift=0){
   #name should be readable for plots
   #fname should not have any spaces
   #ni is the number of individuals sampled per location
   #sample_area is the fraction of the square in each dimension from which you sample individuals
   #   #ex. if sample_area is .5 and the sqaure limits are from 0 to 0.5 in x and 0.5 to 1.0 in y,
   #   #then sample individuals from .125 to .375 in x and .625 and .875 in y
+  #ind_shift is how many individuals to skip before sample (for when you want to do inference twice with 
+  #   non-overlapping sets of individuals)
   
   #set rng seed
   set.seed(seed)
@@ -82,14 +84,14 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
                                         which(positions$x>centers[k,1]-loc_w/(2/sample_area))), 
                               intersect(which(positions$y<centers[k,2]+loc_h/(2/sample_area)),
                                         which(positions$y>centers[k,2]-loc_h/(2/sample_area))))
-      if(length(indiv[[k]]) > ni){ #if there are at least as many individuals as we want from each location
+      if(length(indiv[[k]]) > (ni+ind_shift)){ #if there are at least as many individuals as we want from each location
         #indiv_s[((k-1)*ni+1):(k*ni)] <- indiv[[k]][1:ni] #same ni of the total individuals (order is already randomized)
-        indiv_s_l[[k]] <- indiv[[k]][1:ni] #same ni of the total individuals (order is already randomized)
+        indiv_s_l[[k]] <- indiv[[k]][1:ni+ind_shift] #sample ni of the total individuals (order is already randomized)
       }
       else{
         #indiv_s[((k-1)*ni+1):((k-1)*ni+1+length(indiv[[k]]))] <- indiv[[k]] #if there are fewer than ni, just take all of them
-        indiv_s_l[[k]] <- indiv[[k]]
-        print(paste(c(length(indiv[[k]]),"individuals in location",k)))
+        indiv_s_l[[k]] <- indiv[[k]]-ind_shift
+        print(paste(c(length(indiv[[k]]-ind_shift),"individuals in location",k)))
       }
     }
   }

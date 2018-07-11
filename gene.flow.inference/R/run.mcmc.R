@@ -1,6 +1,7 @@
 #function for running mcmc stuff when you don't know the actual answer
 
-run.mcmc <- function(width,height,g_known=TRUE,fixed_g=FALSE,g=1,coal_type=3,gam=1,const_coal=TRUE,noise=1/500,seed=sample(1000000000,1),
+run.mcmc <- function(width=NA,height=NA,G_adj_known=FALSE,G_adj=NA,g_known=TRUE,fixed_g=FALSE,g=1,coal_type=3,gam=1,const_coal=TRUE,
+                     noise=1/500,seed=sample(1000000000,1),
                      H=NA,h_se=NA,preburn_iter=1e5,burn_iter=1e5,iter=1e5,continue=FALSE,g_init,gam_init,sdG_init,sdgam_init,
                      noisy_H=FALSE,missing_H=FALSE,missing_loc,type="coal"){
   #coal_type: 1 is constant everywhere, 2 is iid, 3 is 1 everywhere, 4 is user specified
@@ -18,12 +19,15 @@ run.mcmc <- function(width,height,g_known=TRUE,fixed_g=FALSE,g=1,coal_type=3,gam
   #save RNG state
   set.seed(seed)
   
-  #number of states in the system
-  n <- width*height
-  
-  #declare generating matrix
-  G_adj <- igraph::get.adjacency(igraph::make_lattice(c(width,height))) 
-  G <- G_adj
+  #create G_adj if width and height are provided
+  if(G_adj_known==FALSE && is.integer(width) && is.integer(height)){
+    #number of states in the system
+    n <- width*height
+    
+    #declare generating matrix
+    G_adj <- igraph::get.adjacency(igraph::make_lattice(c(width,height))) 
+    G <- G_adj
+  }
   
   #find number of parameters
   ng <- length(G_adj@x)
