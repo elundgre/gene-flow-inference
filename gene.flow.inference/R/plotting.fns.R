@@ -28,9 +28,10 @@ plot.ibd <- function(pos_dist,gen_dist,name){
   #abline(lsfit(as.vector(pos_dist),as.vector(gen_dist)),col="blue")
 }
 
-plot.posteriors <- function(g_ts,g_med,name){
-  boxplot(a$ans$g[10*(1:(iter/10)),order(a$ans$g_med)],outline=FALSE,main=paste0("Posterior Distributions: ",name),
-          names=paste0("g",order(a$ans$g_med)),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
+plot.posteriors <- function(g_ts,g_med,name,ord=1:length(g_med),colors=1,subdiv=100){
+  boxplot(g_ts[subdiv*(1:(length(g_ts[,1])/subdiv)),ord],outline=FALSE,boxcol=colors,medcol=colors,whiskcol=colors,staplecol=colors,
+          main=paste0("Posterior Distributions: ",name),
+          names=paste0("g",ord),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
 }
 
 plot.grid <- function(g_med,width,height,G_adj,ng,name){

@@ -22,9 +22,11 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
   
   #return(h)
   #make sure sig2ep is the right length (either a scalar or same length as h)
-  if((length(sig2ep) != 1) || (length(sig2ep) != length(h)))
+  if((length(sig2ep) != 1) && (length(sig2ep) != length(h))){
+    print(length(sig2ep))
+    print(length(h))
     stop("sig2ep must be either a scalar or the same length as h")
-  
+  }
   #make sure G_adj is in sparse matrix format and add diagonal for structure matrix
   #G_adj <- as(G_adj,"dgCMatrix")
   #G_struct <- G_adj
@@ -257,7 +259,7 @@ loglikelihood_c <- function(h,hccalc,sig2ep,g,q,lamG,lamq){
   
   #choose whether it bayesian or not (also change dU_an accordingly)
   #lllh <- -sum(lamG*g)-(1/(2*sig2ep))*sum((hccalc-h)^2,na.rm=TRUE) #bayesian
-  lllh <- -sum(lamG*g)-sum(((hcalc-h)^2)/(2*sig2ep),na.rm=TRUE) #bayesian
+  lllh <- -sum(lamG*g)-sum(((hccalc-h)^2)/(2*sig2ep),na.rm=TRUE) #bayesian
   #lllh <- -(1/(2*sig2ep))*sum((hccalc-h)^2,na.rm=TRUE) #non-bayesian
   #lllh <- -sum(((hcalc-h)^2)/(2*sig2ep),na.rm=TRUE) #non-bayesian
   

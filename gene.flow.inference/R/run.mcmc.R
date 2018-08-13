@@ -20,7 +20,7 @@ run.mcmc <- function(width=NA,height=NA,G_adj_known=FALSE,G_adj=NA,g_known=TRUE,
   set.seed(seed)
   
   #create G_adj if width and height are provided
-  if(G_adj_known==FALSE && is.integer(width) && is.integer(height)){
+  if(G_adj_known==FALSE && width%%1==0 && height%%1==0){ #make sure width and height are integers
     #number of states in the system
     n <- width*height
     
@@ -69,8 +69,7 @@ run.mcmc <- function(width=NA,height=NA,G_adj_known=FALSE,G_adj=NA,g_known=TRUE,
     } else if(coal_type == 4){
       if(length(gam) != n) stop("invalid number of coalescence rates")
       if(const_coal) ngam <- 1 else ngam <- n
-    }
-    else{
+    } else{
       stop("invalid coalescence type")
     }
     
@@ -101,8 +100,7 @@ run.mcmc <- function(width=NA,height=NA,G_adj_known=FALSE,G_adj=NA,g_known=TRUE,
     H_noise[lower.tri(H_noise)] <- t(H_noise)[lower.tri(H_noise)]
     if(noisy_H==TRUE) H_infer <- H_noise
   
-  }
-  else{
+  } else {
     H_infer <- H
     #use provided noise estimate (if provided)
     #if(h_se != NA){

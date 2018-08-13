@@ -2,7 +2,7 @@
 
 slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,height=4,ni=50,sample_area=.5,
                            seed=sample(1000000000,1),preburn_iter=1e6,burn_iter=3e6,iter=4e6,inpath=getwd(),outpath=getwd(),
-                           pos_name="positions3.txt",gen_name="ms3.txt",landscape_matrix=NULL,ind_shift=0){
+                           pos_name="positions3.txt",gen_name="ms3.txt",landscape_matrix=NULL,ind_shift=0,type="coal"){
   #name should be readable for plots
   #fname should not have any spaces
   #ni is the number of individuals sampled per location
@@ -199,7 +199,7 @@ slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,heig
   
   #run mcmc
   system.time(a <- run.mcmc(width,height,g_known=FALSE,const_coal=TRUE,H=Hs,h_se=hs_se,seed=seed,
-                               preburn_iter=preburn_iter,burn_iter=burn_iter,iter=iter,noisy_H=FALSE,type="coal"))
+                               preburn_iter=preburn_iter,burn_iter=burn_iter,iter=iter,noisy_H=FALSE,type=type))
   
   save(list=ls(),file=paste0(outpath,"/",fname,".RData"))
   
