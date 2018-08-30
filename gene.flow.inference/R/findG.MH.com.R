@@ -62,7 +62,8 @@ findG.MH.com <- function(H,G_adj,iter=10000,fixed_start=FALSE,g_init=1,q_init=1,
   #roll initial values
   g[1,] <- rexp(ng,lamG)
   #g[1,] <- g_init #use stating guess
-  q[1,] <- rexp(nq,lamq)
+  #q[1,] <- rexp(nq,lamq)
+  q[1,] <- Matrix::diag(H) #use observed within location diversities
   #q[1,] <- q_init
   
   #set values if starting point is fixed

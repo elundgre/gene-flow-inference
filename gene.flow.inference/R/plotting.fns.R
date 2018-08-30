@@ -34,10 +34,15 @@ plot.posteriors <- function(g_ts,g_med,name,ord=1:length(g_med),colors=1,subdiv=
           names=paste0("g",ord),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
 }
 
-plot.grid <- function(g_med,width,height,G_adj,ng,name){
-  par(mar=(c(0,0,2,0))) #margins all zero except top
+plot.grid <- function(g_med,width,height,G_adj_known=FALSE,G_adj=NA,ng=length(G_adj@x),name,mar=c(0,0,2,0)){
+  par(mar=mar) #margins all zero except top default
+  if(G_adj_known==FALSE && width%%1==0 && height%%1==0){ #make sure width and height are integers
+    #declare generating matrix
+    G_adj <- igraph::get.adjacency(igraph::make_lattice(c(width,height))) 
+    ng <- length(G_adj@x)
+  }
   gr <- igraph::graph_from_adjacency_matrix(G_adj,mode="directed",weighted=TRUE)
   igraph::E(gr)$curved <- TRUE
-  plot(gr,layout=as.matrix(expand.grid(1:width,1:height)),edge.width=2*a$ans$g_med,
-       edge.label=paste0("g",1:ng,"=",round(a$ans$g_med*1000)/1000),main=paste0("Graph Structure: ",name))
+  plot(gr,layout=as.matrix(expand.grid(1:width,1:height)),edge.width=2*g_med,
+       edge.label=paste0("g",1:ng,"=",round(g_med*1000)/1000),main=paste0("Graph Structure: ",name))
 }
