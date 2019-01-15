@@ -122,11 +122,6 @@ pdf('poplar_groups.pdf', width=12, height=12)
     abline(h=52.2)
     abline(a = south_separator$a,
            b = south_separator$b)
-    if (construct_data) {
-        title(main="conStruct drainages")
-    } else {
-        title(main="full dataset")
-    }
 dev.off()
 
 ########
@@ -194,3 +189,4 @@ stopifnot(all(pops$Accession == gsub(".", "-", colnames(genotypes)[-1], fixed=TR
 
 write.table(pops[,c("Accession", "Species", "Latitude", "Longitude", "groups")], file="populus_info.tsv", row.names=FALSE)
 write.table(D, file="populus_genetic_distance.tsv")
+write.table(centroids, file="populus_group_centroids.tsv", row.names=FALSE)
