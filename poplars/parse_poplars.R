@@ -5,6 +5,8 @@ library(spdep)
 library(colorspace)
 library(maps)
 
+# Download data from https://datadryad.org/resource/doi:10.5061/dryad.7s848
+#   and convert linebreaks
 
 adjacency <- matrix(0, nrow=9, ncol=9)
 adjlist <- list( c(1,6), c(1,7), c(6,7), c(2,5), c(7,2), c(2,4), c(4,8), c(3,4), c(3,8), c(8,9), c(9,3), c(2,8), c(2,3), c(2,6), c(3,5), c(6,5) )
@@ -15,21 +17,12 @@ for (adj in adjlist) {
 
 # Divide into groups
 pdf('poplar_groups.pdf', width=12, height=12)
-poplist <- lapply(c('construct'=TRUE, 'all'=FALSE), function (construct_data) {
-    if (construct_data) {
-        load("poplar.data.Robj")
-        pops <- data.frame(poplar.data$coords)
-        colnames(pops) <- c("Longitude", "Latitude")
-        pops$Species <- poplar.data$sp.ID
-        pops$sample_size <- c(10, 40, 10, 34, 17, 50, 14, 12, 4, 32, 10, 9, 17, 29, 8, 26, 7, 26, 13, 8, 10, 23, 4, 5, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-    } else {
-        pops <- read.csv("Populus_metadata.csv", header=TRUE, skip=1, stringsAsFactors=FALSE)
-        pops$Latitude <- as.numeric(pops$Latitude)
-        pops$Longitude <- as.numeric(pops$Longitude)
-        pops$Elevation <- as.numeric(pops$Elevation)
-        pops <- subset(pops, !is.na(pops$Latitude))
-        pops$Species <- factor(pops$Species)
-    }
+    pops <- read.csv("Populus_metadata.csv", header=TRUE, skip=1, stringsAsFactors=FALSE)
+    pops$Latitude <- as.numeric(pops$Latitude)
+    pops$Longitude <- as.numeric(pops$Longitude)
+    pops$Elevation <- as.numeric(pops$Elevation)
+    pops <- subset(pops, !is.na(pops$Latitude))
+    pops$Species <- factor(pops$Species)
 
     pop_coords <- SpatialPoints(as.matrix(pops[,c("Longitude", "Latitude")]),
                                 proj4string=CRS("+proj=longlat"))
@@ -134,45 +127,68 @@ poplist <- lapply(c('construct'=TRUE, 'all'=FALSE), function (construct_data) {
     } else {
         title(main="full dataset")
     }
-    return(list(pops=pops, centroids=centroids))
-})
 dev.off()
 
-
+########
 # compute pairwise distances
-groups <- poplist$construct$pops$groups
-load("poplar.data.Robj")
-n <- tapply(poplar.data$sample.sizes, groups, sum)
-P <- matrix(NA, nrow=nlevels(groups), ncol=ncol(poplar.data$freqs))
-species <- ifelse(grepl("trichocarpa", levels(groups)), "trichocarpa", "balsamifera")
-for (k in 1:nlevels(groups)) {
-    ut <- (!is.na(groups)) & (groups == levels(groups)[k])
-    P[k,] <- colSums(poplar.data$freqs[ut,,drop=FALSE] * poplar.data$sample.sizes[ut]) / n[k]
+########
+
+con <- pipe("tail -n +10 FOR_DRYAD_TandB_fwd_june2013_434.txt | sed -e 's/|[^\t]*//g'", open="r")
+genotypes <- read.delim(con, sep="\t", stringsAsFactors=FALSE)[,-1]
+close(con)
+
+samp.indices <- match(colnames(genotypes)[-1], gsub("-", ".", pops$Accession))
+stopifnot(all(!is.na(samp.indices)))
+pops <- pops[samp.indices,]
+
+# remove snps with >= 5% missing data, removing 2314 and retaining 30756
+genotypes[genotypes == ""] <- NA
+genotypes <- genotypes[rowMeans(is.na(genotypes)) < 0.05,]
+# Look at missing data by individual
+pmiss <- colMeans(is.na(genotypes)[,-1])
+plot(sort(pmiss), col=as.numeric(pops$Species)[order(pmiss)])
+with(pops, plot(Longitude, Latitude, cex=100*pmiss, col=Species))
+
+# remove furthest east indiv and indiv with 15% missing
+remove_these <- (pops$Longitude > -100) | (pmiss > 0.1)
+pops <- pops[!remove_these,]
+genotypes <- genotypes[,c(TRUE, !remove_these)]
+
+geno1 <- do.call(cbind, lapply(genotypes[-1], substr, 1, 1))
+geno2 <- do.call(cbind, lapply(genotypes[-1], substr, 2, 2))
+
+D <- matrix(NA, nrow=ncol(genotypes)-1, ncol=ncol(genotypes)-1)
+for (i in 1:ncol(D)) {
+    D[i, i] <- mean(geno1[,i] != geno2[,i], na.rm=TRUE)
+    for (j in (i:ncol(D))[-1]) {
+        D[i, j] <- D[j, i] <- (mean(geno1[,i] != geno1[,j], na.rm=TRUE) 
+                               + mean(geno1[,i] != geno2[,j], na.rm=TRUE)
+                               + mean(geno2[,i] != geno1[,j], na.rm=TRUE)
+                               + mean(geno2[,i] != geno2[,j], na.rm=TRUE))/4
+    }
 }
-stopifnot(all(!is.na(P)))
-D <- tcrossprod(P, 1-P) + tcrossprod(1-P, P)
-diag(D) <- 2 * rowSums(P * (1-P)) * n / (n - 1)
-D <- D / ncol(P)
 
-centroids <- poplist$all$centroids
-dists <- sqrt(outer(centroids[,1], centroids[,1], "-")^2 
-              + outer(centroids[,1], centroids[,1], "-")^2)
 
-# not so much IBD?
-ut <- upper.tri(dists, diag=TRUE) # & (species[row(dists)] == "trichocarpa") & (species[col(dists)] == "trichocarpa")
-plot(dists[ut], D[ut])
+# Look at IBD
+ut <- upper.tri(dists, diag=TRUE) 
+cols <- D
+cols[] <- NA
+cols[(species[row(dists)] == "trichocarpa") & (species[col(dists)] == "trichocarpa")] <- 'blue'
+cols[(species[row(dists)] == "trichocarpa") & (species[col(dists)] != "trichocarpa")] <- 'red'
+cols[(species[row(dists)] != "trichocarpa") & (species[col(dists)] == "trichocarpa")] <- 'red'
+cols[(species[row(dists)] != "trichocarpa") & (species[col(dists)] != "trichocarpa")] <- 'green'
+plot(dists[ut], D[ut], col=cols[ut])
+legend("topleft", pch=1, col=c("blue", "red", "green"), legend=c("tri", "tri-bal", "bal"))
 
-if (FALSE) {
-    # check isolation by distance in the unaggregated data
-    ut <- (poplar.data$sp.ID == "Populus trichocarpa")
-    P <- poplar.data$freqs[ut,]
-    n <- poplar.data$sample.sizes[ut]
-    D <- tcrossprod(P, 1-P) + tcrossprod(1-P, P)
-    diag(D) <- 2 * rowSums(P * (1-P)) * n / (n - 1)
-    D <- D / ncol(P)
-    centroids <- poplar.data$coords[ut,]
-    dists <- sqrt(outer(centroids[,1], centroids[,1], "-")^2 
-                  + outer(centroids[,1], centroids[,1], "-")^2)
-    plot(dists[upper.tri(dists)],
-         D[upper.tri(dists)])
-}
+#######
+# output
+#######
+
+samp.indices <- match(colnames(genotypes)[-1], gsub("-", ".", pops$Accession))
+stopifnot(all(!is.na(samp.indices)))
+pops <- pops[samp.indices,]
+
+write.table(pops[,c("Accession", "Species", "Latitude", "Longitude", "groups")], file="populus_info.tsv", row.names=FALSE)
+
+dists <- sqrt(outer(pops$Latitude, pops$Latitude, "-")^2 
+              + outer(pops$Longitude, pops$Longitude, "-")^2)
