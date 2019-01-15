@@ -1,0 +1,10 @@
+- populus_genetic_distance.tsv : the pairwise genetic distance matrix
+- populus_info.tsv : the information for individuals in populus_genetic_distance.tsv, in the same order
+- poplar_groups.pdf : plot showing the groups
+- populus_ibd.png : plot of isolation by distance of the above
+- parse_poplars.R : the R script to clean data and compute the above
+- Populus_metadata.csv : original metadata file
+
+Not present:
+- FOR_DRYAD_TandB_fwd_june2013_434.txt : obtain this from https://datadryad.org/resource/doi:10.5061/dryad.7s848
+

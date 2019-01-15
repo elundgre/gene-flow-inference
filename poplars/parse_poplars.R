@@ -167,28 +167,30 @@ for (i in 1:ncol(D)) {
                                + mean(geno2[,i] != geno2[,j], na.rm=TRUE))/4
     }
 }
+rownames(D) <- colnames(D) <- pops$Accession
 
 
 # Look at IBD
+dists <- sqrt(outer(pops$Latitude, pops$Latitude, "-")^2 
+              + outer(pops$Longitude, pops$Longitude, "-")^2)
 ut <- upper.tri(dists, diag=TRUE) 
 cols <- D
 cols[] <- NA
-cols[(species[row(dists)] == "trichocarpa") & (species[col(dists)] == "trichocarpa")] <- 'blue'
-cols[(species[row(dists)] == "trichocarpa") & (species[col(dists)] != "trichocarpa")] <- 'red'
-cols[(species[row(dists)] != "trichocarpa") & (species[col(dists)] == "trichocarpa")] <- 'red'
-cols[(species[row(dists)] != "trichocarpa") & (species[col(dists)] != "trichocarpa")] <- 'green'
-plot(dists[ut], D[ut], col=cols[ut])
+cols[(pops$Species[row(dists)] == "Populus trichocarpa") & (pops$Species[col(dists)] == "Populus trichocarpa")] <- adjustcolor('blue', 0.5)
+cols[(pops$Species[row(dists)] == "Populus trichocarpa") & (pops$Species[col(dists)] != "Populus trichocarpa")] <- adjustcolor('red', 0.5)
+cols[(pops$Species[row(dists)] != "Populus trichocarpa") & (pops$Species[col(dists)] == "Populus trichocarpa")] <- adjustcolor('red', 0.5)
+cols[(pops$Species[row(dists)] != "Populus trichocarpa") & (pops$Species[col(dists)] != "Populus trichocarpa")] <- adjustcolor('green', 0.5)
+
+png(file="populus_ibd.png", width=8*288, height=6*288, res=288)
+plot(dists[ut], D[ut], col=cols[ut], pch=20, cex=0.5)
 legend("topleft", pch=1, col=c("blue", "red", "green"), legend=c("tri", "tri-bal", "bal"))
+dev.off()
 
 #######
 # output
 #######
 
-samp.indices <- match(colnames(genotypes)[-1], gsub("-", ".", pops$Accession))
-stopifnot(all(!is.na(samp.indices)))
-pops <- pops[samp.indices,]
+stopifnot(all(pops$Accession == gsub(".", "-", colnames(genotypes)[-1], fixed=TRUE)))
 
 write.table(pops[,c("Accession", "Species", "Latitude", "Longitude", "groups")], file="populus_info.tsv", row.names=FALSE)
-
-dists <- sqrt(outer(pops$Latitude, pops$Latitude, "-")^2 
-              + outer(pops$Longitude, pops$Longitude, "-")^2)
+write.table(D, file="populus_genetic_distance.tsv")
