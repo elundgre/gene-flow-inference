@@ -1,4 +1,4 @@
-#function for doing inference on a slim output (or any ms output with continuout space position data)
+#' function for doing inference on a slim output (or any ms output with continuous space position data)
 
 slim.inference <- function(name="",fname="",xlim=c(0,1),ylim=c(0,1),width=4,height=4,ni=50,sample_area=.5,
                            seed=sample(1000000000,1),preburn_iter=1e6,burn_iter=3e6,iter=4e6,inpath=getwd(),outpath=getwd(),

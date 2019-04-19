@@ -1,6 +1,6 @@
 #functions for plotting data and inference that has already been completed
 
-plot.ind.locs <- function(name,positions,indiv_s,width,heigth,loc_w,loc_h,landscape_matrix=NA,xlim,ylim){
+plot.ind.locs <- function(name,positions,indiv_s,width,height,loc_w,loc_h,landscape_matrix=NA,xlim,ylim){
   #make plot title
   main <- paste0("Individual Locations: ",name)
   if(is.matrix(landscape_matrix) == TRUE){
@@ -28,21 +28,33 @@ plot.ibd <- function(pos_dist,gen_dist,name){
   #abline(lsfit(as.vector(pos_dist),as.vector(gen_dist)),col="blue")
 }
 
-plot.posteriors <- function(g_ts,g_med,name,ord=1:length(g_med),colors=1,subdiv=100){
+plot.posteriors <- function(g_ts,g_med,ord=1:length(g_med),colors="black",subdiv=100,
+                            name,xlab="Parameter Index",ylab="Parameter Value (rate)"){
   boxplot(g_ts[subdiv*(1:(length(g_ts[,1])/subdiv)),ord],outline=FALSE,boxcol=colors,medcol=colors,whiskcol=colors,staplecol=colors,
-          main=paste0("Posterior Distributions: ",name),
-          names=paste0("g",ord),xlab="Parameter Index",ylab="Parameter Value (rate)",las=2)
+          main=paste0(name),
+          names=paste0("g",ord),xlab=xlab,ylab=ylab,las=2)
 }
 
-plot.grid <- function(g_med,width,height,G_adj_known=FALSE,G_adj=NA,ng=length(G_adj@x),name,mar=c(0,0,2,0)){
+plot.grid <- function(g_med,gam_med=1,width,height,name,mar=c(0,0,2,0),rect_grid=TRUE,
+                      use_centroids=FALSE,centroids,G_adj,asp=1){
   par(mar=mar) #margins all zero except top default
-  if(G_adj_known==FALSE && width%%1==0 && height%%1==0){ #make sure width and height are integers
+  #make graph if it is rectangular
+  if(rect_grid==TRUE && width%%1==0 && height%%1==0){ #make sure width and height are integers
     #declare generating matrix
     G_adj <- igraph::get.adjacency(igraph::make_lattice(c(width,height))) 
     ng <- length(G_adj@x)
+    layout <- as.matrix(expand.grid(1:width,1:height)) #specify vertex locations
+  }
+  #make graph using centroids and adjacency matrix
+  if(use_centroids==TRUE){
+    ng <- length(G_adj@x)
+    layout <- centroids
   }
   gr <- igraph::graph_from_adjacency_matrix(G_adj,mode="directed",weighted=TRUE)
   igraph::E(gr)$curved <- TRUE
-  plot(gr,layout=as.matrix(expand.grid(1:width,1:height)),edge.width=2*g_med,
-       edge.label=paste0("g",1:ng,"=",round(g_med*1000)/1000),main=paste0("Graph Structure: ",name))
+  plot(gr,layout=layout,edge.width=5*tanh(g_med/3),
+       edge.color=rgb(colorRamp(c("#DD8000","gray","#9999FF"))(tanh(g_med/2)),max=255),
+       edge.label=paste0("g",1:ng,"=",round(g_med*100)/100),edge.label.color="#000000",
+       vertex.color=rgb(colorRamp(c("#DD8000","gray","#9999FF"))(tanh(gam_med/2)),max=255),
+       main=paste0(name),asp=asp)
 }
